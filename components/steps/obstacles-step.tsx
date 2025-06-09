@@ -21,7 +21,7 @@ const obstacleCategories = [
     options: [
       { id: "time", label: "Falta de tempo para treinamento" },
       { id: "resistance", label: "Resistência a novas ferramentas" },
-      { id: "turnover", label: "Rotativ idade da equipe" },
+      { id: "turnover", label: "Rotatividade da equipe" },
     ],
   },
   {
