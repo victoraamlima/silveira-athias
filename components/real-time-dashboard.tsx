@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import NextImage from "next/image"
 import { useDatabase } from "@/components/dashboard/database-context"
@@ -15,10 +15,28 @@ import OnboardingStats from "@/components/dashboard/onboarding-stats"
 type DashboardState = "waiting" | "voting" | "results" | "decision"
 
 export default function RealTimeDashboard() {
-  const { totalVotes, startVoting, endVoting, resetVoting, dashboardState, setDashboardState } = useDatabase()
+  const { totalVotes, startVoting, endVoting, resetVoting, dashboardState, setDashboardState, currentSessionId } = useDatabase()
 
-  const [timeLeft, setTimeLeft] = useState(60)
+  const [timeLeft, setTimeLeft] = useState(300) // 5 minutos
   const [showCountdown, setShowCountdown] = useState(false)
+
+  // Adicione estados para os dados da votação
+  const [votingData, setVotingData] = useState<any>(null)
+  const [loadingVoting, setLoadingVoting] = useState(true)
+
+  // Defina o sessionId da votação (pode ser fixo ou dinâmico)
+  // Buscar dados da votação em tempo real
+  useEffect(() => {
+    if (!currentSessionId) return
+    setLoadingVoting(true)
+    fetch(`/api/voting?sessionId=${currentSessionId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setVotingData(data.data)
+        setLoadingVoting(false)
+      })
+      .catch(() => setLoadingVoting(false))
+  }, [dashboardState, currentSessionId, totalVotes])
 
   useEffect(() => {
     if (dashboardState === "voting" && showCountdown) {
@@ -42,7 +60,7 @@ export default function RealTimeDashboard() {
     console.log("Botão Iniciar Votação clicado")
     try {
       await startVoting()
-      setTimeLeft(60)
+      setTimeLeft(300) // 5 minutos
       setShowCountdown(true)
       console.log("Função startVoting executada com sucesso")
     } catch (error) {
@@ -72,6 +90,7 @@ export default function RealTimeDashboard() {
     setDashboardState("waiting")
   }
 
+  // Passe os dados reais para os componentes
   return (
     <div className="space-y-6 md:space-y-8">
       {/* Status Bar - Fully Responsive */}
@@ -184,7 +203,11 @@ export default function RealTimeDashboard() {
                     <BarChart3 className="h-4 w-4 md:h-5 md:w-5 text-amber-600" />
                     <span>Resultados em Tempo Real</span>
                   </h2>
-                  <ResultsChart />
+                  {loadingVoting ? (
+                    <div className="text-center text-slate-500">Carregando votos...</div>
+                  ) : (
+                    <ResultsChart votingData={votingData} />
+                  )}
                 </Card>
               </motion.div>
             )}
@@ -202,7 +225,11 @@ export default function RealTimeDashboard() {
                     <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-cyan-600" />
                     <span>Resultados Finais</span>
                   </h2>
-                  <ResultsChart showFinalResults />
+                  {loadingVoting ? (
+                    <div className="text-center text-slate-500">Carregando votos...</div>
+                  ) : (
+                    <ResultsChart votingData={votingData} showFinalResults />
+                  )}
                 </Card>
               </motion.div>
             )}
@@ -216,7 +243,7 @@ export default function RealTimeDashboard() {
                 transition={{ duration: 0.5 }}
               >
                 <Card className="bg-white/80 backdrop-blur-md border border-slate-200 shadow-lg rounded-xl p-4 md:p-6 h-[400px] md:h-[500px]">
-                  <DecisionDisplay />
+                  <DecisionDisplay votingData={votingData} />
                 </Card>
               </motion.div>
             )}
@@ -275,7 +302,7 @@ export default function RealTimeDashboard() {
                   transition={{ duration: 0.5, delay: 0.1 }}
                 >
                   <Card className="bg-white/80 backdrop-blur-md border border-slate-200 shadow-lg rounded-xl p-4 md:p-6">
-                    <VoteCounter />
+                    <VoteCounter votingData={votingData} />
                   </Card>
                 </motion.div>
 
@@ -287,7 +314,7 @@ export default function RealTimeDashboard() {
                   transition={{ duration: 0.5, delay: 0.2 }}
                 >
                   <Card className="bg-white/80 backdrop-blur-md border border-slate-200 shadow-lg rounded-xl p-4 md:p-6">
-                    <ActiveVoters />
+                    <ActiveVoters voterList={votingData?.voterList} />
                   </Card>
                 </motion.div>
               </>

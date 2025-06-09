@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { useDatabase } from "./database-context"
 
 type Props = {
+  votingData: any
   showFinalResults?: boolean
 }
 

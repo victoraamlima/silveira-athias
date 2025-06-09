@@ -138,43 +138,10 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
         setVoters((prev) => prev.map((voter) => ({ ...voter, hasVoted: false })))
         setFinalVotes(null)
 
-        // Simular votos chegando
-        simulateVotes(createResult.sessionId)
         console.log("Votação iniciada com sucesso!")
       }
     } catch (error) {
       console.error("Erro ao iniciar votação:", error)
-    }
-  }
-
-  const simulateVotes = async (sessionId: number) => {
-    const voterNames = voters.map((v) => v.name)
-    const options = ["optionA", "optionB", "optionC"]
-
-    // Simular votos em intervalos aleatórios
-    for (let i = 0; i < voterNames.length; i++) {
-      setTimeout(
-        async () => {
-          const randomOption = options[Math.floor(Math.random() * options.length)]
-
-          try {
-            await fetch("/api/voting", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                action: "cast_vote",
-                sessionId,
-                voterName: voterNames[i],
-                optionId: randomOption,
-              }),
-            })
-            console.log(`Voto simulado para ${voterNames[i]}: ${randomOption}`)
-          } catch (error) {
-            console.error("Erro ao simular voto:", error)
-          }
-        },
-        (i + 1) * (1500 + Math.random() * 2000),
-      ) // Intervalos de 1.5-3.5s
     }
   }
 

@@ -6,7 +6,11 @@ import { CheckCircle, Clock, Calendar, Users, ArrowRight } from "lucide-react"
 import NextImage from "next/image"
 import { useDatabase } from "./database-context"
 
-export default function DecisionDisplay() {
+interface DecisionDisplayProps {
+  votingData: any
+}
+
+export default function DecisionDisplay({ votingData }: DecisionDisplayProps) {
   const { finalVotes } = useDatabase()
   const [showConfetti, setShowConfetti] = useState(false)
 

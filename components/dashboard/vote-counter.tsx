@@ -4,7 +4,11 @@ import { motion } from "framer-motion"
 import { useDatabase } from "./database-context"
 import { PieChart, CheckCircle2 } from "lucide-react"
 
-export default function VoteCounter() {
+type VoteCounterProps = {
+  votingData: any
+}
+
+export default function VoteCounter({ votingData }: VoteCounterProps) {
   const { totalVotes, voters } = useDatabase()
   const totalVoters = voters.length
   const percentage = Math.round((totalVotes / totalVoters) * 100) || 0

@@ -1,4 +1,4 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { neon } from "@neondatabase/serverless"
 
 const sql = neon(process.env.DATABASE_URL!)
@@ -8,62 +8,70 @@ export async function POST(request: NextRequest) {
     const data = await request.json()
     const { sessionId, adoption, prioritization, respondentInfo } = data
 
-    // Preparar dados de priorização
-    const priorityData = Object.entries(prioritization).reduce((acc, [key, value]: [string, any]) => {
-      acc[`priority_${key.toLowerCase()}_selected`] = value.selected
-      acc[`priority_${key.toLowerCase()}_impact`] = value.impact
-      return acc
-    }, {} as any)
-
-    // Inserir ou atualizar resposta do questionário
-    const result = await sql`
+    // Exemplo de inserção correta:
+    await sql`
       INSERT INTO onboarding_responses (
         session_id,
-        respondent_name,
-        respondent_email,
         adoption_knowledge,
         adoption_tools,
         adoption_integration,
         adoption_automation,
         adoption_measurement,
-        ${sql(Object.keys(priorityData).join(", "))},
-        completed_at
+        priority_a_selected,
+        priority_a_impact,
+        priority_b_selected,
+        priority_b_impact,
+        priority_c_selected,
+        priority_c_impact,
+        priority_d_selected,
+        priority_d_impact,
+        priority_e_selected,
+        priority_e_impact,
+        priority_f_selected,
+        priority_f_impact
       ) VALUES (
         ${sessionId},
-        ${respondentInfo?.name || null},
-        ${respondentInfo?.email || null},
         ${adoption.knowledge},
         ${adoption.tools},
         ${adoption.integration},
         ${adoption.automation},
         ${adoption.measurement},
-        ${sql(Object.values(priorityData))},
-        NOW()
+        ${prioritization.A.selected},
+        ${prioritization.A.impact},
+        ${prioritization.B.selected},
+        ${prioritization.B.impact},
+        ${prioritization.C.selected},
+        ${prioritization.C.impact},
+        ${prioritization.D.selected},
+        ${prioritization.D.impact},
+        ${prioritization.E.selected},
+        ${prioritization.E.impact},
+        ${prioritization.F.selected},
+        ${prioritization.F.impact}
       )
-      ON CONFLICT (session_id) 
-      DO UPDATE SET
+      ON CONFLICT (session_id) DO UPDATE SET
         adoption_knowledge = EXCLUDED.adoption_knowledge,
         adoption_tools = EXCLUDED.adoption_tools,
         adoption_integration = EXCLUDED.adoption_integration,
         adoption_automation = EXCLUDED.adoption_automation,
         adoption_measurement = EXCLUDED.adoption_measurement,
-        ${sql(
-          Object.keys(priorityData)
-            .map((key) => `${key} = EXCLUDED.${key}`)
-            .join(", "),
-        )},
-        updated_at = NOW()
-      RETURNING id
+        priority_a_selected = EXCLUDED.priority_a_selected,
+        priority_a_impact = EXCLUDED.priority_a_impact,
+        priority_b_selected = EXCLUDED.priority_b_selected,
+        priority_b_impact = EXCLUDED.priority_b_impact,
+        priority_c_selected = EXCLUDED.priority_c_selected,
+        priority_c_impact = EXCLUDED.priority_c_impact,
+        priority_d_selected = EXCLUDED.priority_d_selected,
+        priority_d_impact = EXCLUDED.priority_d_impact,
+        priority_e_selected = EXCLUDED.priority_e_selected,
+        priority_e_impact = EXCLUDED.priority_e_impact,
+        priority_f_selected = EXCLUDED.priority_f_selected,
+        priority_f_impact = EXCLUDED.priority_f_impact
     `
-
-    return NextResponse.json({
-      success: true,
-      message: "Dados salvos com sucesso",
-      id: result[0]?.id,
-    })
+    return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Erro ao salvar dados do onboarding:", error)
-    return NextResponse.json({ success: false, message: "Erro interno do servidor" }, { status: 500 })
+    return NextResponse.json({ success: false, error: String(error) }, { status: 500 })
   }
 }
 

@@ -4,7 +4,11 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useDatabase } from "./database-context"
 import { Users } from "lucide-react"
 
-export default function ActiveVoters() {
+type ActiveVotersProps = {
+  voterList?: any
+}
+
+export default function ActiveVoters({ voterList }: ActiveVotersProps) {
   const { voters } = useDatabase()
 
   return (
