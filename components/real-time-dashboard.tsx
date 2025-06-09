@@ -17,7 +17,7 @@ type DashboardState = "waiting" | "voting" | "results" | "decision"
 export default function RealTimeDashboard() {
   const { totalVotes, startVoting, endVoting, resetVoting, dashboardState, setDashboardState } = useDatabase()
 
-  const [timeLeft, setTimeLeft] = useState(60)
+  const [timeLeft, setTimeLeft] = useState(600)
   const [showCountdown, setShowCountdown] = useState(false)
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function RealTimeDashboard() {
     console.log("Botão Iniciar Votação clicado")
     try {
       await startVoting()
-      setTimeLeft(60)
+      setTimeLeft(600)
       setShowCountdown(true)
       console.log("Função startVoting executada com sucesso")
     } catch (error) {
@@ -97,7 +97,9 @@ export default function RealTimeDashboard() {
             {showCountdown && (
               <div className="flex items-center gap-2 bg-slate-100/80 backdrop-blur-md rounded-full px-3 md:px-4 py-1.5 border border-slate-200">
                 <Clock className="h-3 w-3 md:h-4 md:w-4 text-amber-600" />
-                <span className="font-mono font-bold text-slate-900 text-sm md:text-base">{timeLeft}s</span>
+                <span className="font-mono font-bold text-slate-900 text-sm md:text-base">
+                  {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, "0")}
+                </span>
               </div>
             )}
 

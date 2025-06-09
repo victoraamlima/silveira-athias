@@ -82,10 +82,14 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const sessionId = searchParams.get("sessionId")
+    let sessionId = searchParams.get("sessionId")
 
     if (!sessionId) {
-      return NextResponse.json({ success: false, message: "Session ID obrigatório" }, { status: 400 })
+      const active = await sql`SELECT id FROM voting_sessions WHERE status = 'voting' ORDER BY created_at DESC LIMIT 1`
+      if (active.length === 0) {
+        return NextResponse.json({ success: false, message: "Nenhuma sessão ativa" }, { status: 404 })
+      }
+      sessionId = String(active[0].id)
     }
 
     console.log("Buscando dados da sessão:", sessionId)
