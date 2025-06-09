@@ -9,6 +9,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  basePath: '/silveira-athias',
+  assetPrefix: '/silveira-athias/',
 }
 
 export default nextConfig
